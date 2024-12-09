@@ -2,6 +2,7 @@ from typing import Union
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 import os
+base_path = os.path.abspath(".")
 from fastapi.middleware.cors import CORSMiddleware
 from judge import Judge
 
@@ -24,12 +25,14 @@ app.add_middleware(
 
 @app.get("/api/problems/{problem_id}")
 async def get_problem(problem_id: str):
-    problem_path = f"./problems/{problem_id}/{problem_id}.md"
+    problem_path = f"./Problems/{problem_id}/{problem_id}.md"
     if os.path.exists(problem_path):
         with open(problem_path, "r",  encoding="utf-8") as file:
             description = file.read()
+        print("file found:{problem_path}")
         return JSONResponse(content={"description": description})
     else:
+        print(f"File not found: {problem_path}")
         raise HTTPException(status_code=404, detail="Problem not found")
     
 @app.post("/api/submit/{problem_id}")
