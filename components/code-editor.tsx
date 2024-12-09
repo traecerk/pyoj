@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -76,10 +77,10 @@ export default function CodeEditor() {
   }, [selectedProblem]);
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="flex flex-col h-screen w-screen overflow-hidden">
       {/* Top Navigation */}
-      <header className="border-b">
-        <div className="container flex items-center justify-between py-2">
+      <header className="border-b flex-shrink-0">
+        <div className="w-full px-4 flex items-center justify-between py-2">
           <h1 className="text-lg font-semibold">PYOJ</h1>
           <div className="flex items-center gap-2">
             <Select value={language} onValueChange={setLanguage}>
@@ -97,9 +98,9 @@ export default function CodeEditor() {
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 container py-4 grid grid-cols-2 gap-4">
+      <div className="flex-grow grid grid-cols-2 gap-4 overflow-hidden">
         {/* Left Panel */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 overflow-hidden h-full">
           <Select value={selectedProblem} onValueChange={setSelectedProblem}>
             <SelectTrigger>
               <SelectValue placeholder="选择题目" />
@@ -113,8 +114,8 @@ export default function CodeEditor() {
               <SelectItem value="F">Problem F</SelectItem>
             </SelectContent>
           </Select>
-          <Card className="flex-1 overflow-hidden">
-            <ScrollArea className="h-[calc(100vh-200px)] p-4">
+          <Card className="flex-grow overflow-hidden h-full">
+            <ScrollArea className="h-full p-4">
               {problemContent ? (
                 <ReactMarkdown className="prose dark:prose-invert">
                   {problemContent}
@@ -129,7 +130,7 @@ export default function CodeEditor() {
         </div>
 
         {/* Right Panel - Code Editor with Syntax Highlighting */}
-        <Card className="relative overflow-hidden flex-1">
+        <Card className="overflow-hidden flex-grow h-full">
           <MonacoEditor
             language="python"
             theme="vs-dark"
@@ -143,15 +144,15 @@ export default function CodeEditor() {
             editorDidMount={(editor) => {
               editor.focus();
             }}
+            className="h-full"
           />
         </Card>
       </div>
 
       {/* Bottom Toolbar */}
-      <footer className="border-t">
-        <div className="container py-2 flex justify-between items-center">
-          <div className="flex gap-2">
-            {/* <Button variant="outline" size="sm" onClick={() => executeCode}>执行代码</Button> */}
+      <footer className="border-t flex-shrink-0">
+        <div className="w-full px-4 flex items-center justify-between py-2">
+          <div className="flex gap-2 items-center">
             <Button
               variant="outline"
               size="sm"
@@ -167,10 +168,8 @@ export default function CodeEditor() {
               提交
             </Button>
 
-            <div className="flex-1 flex justify-center items-center">
-              <div className="text-sm text-muted-foreground">
-                <span>评判结果: {judgementResult}</span>
-              </div>
+            <div className="text-sm text-muted-foreground">
+              <span>评判结果: {judgementResult}</span>
             </div>
           </div>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
