@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +11,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import ReactMarkdown from "react-markdown";
-import MonacoEditor from "react-monaco-editor";
+import MonacoEditor from "@monaco-editor/react"; // Ensure you import MonacoEditor correctly
 
 const fetchProblemData = async (problem: string): Promise<string> => {
   try {
@@ -61,9 +60,9 @@ const submitCode = (
 
 export default function CodeEditor() {
   const [judgementResult, setJudgementResult] = useState<string | null>(null);
-  const [language, setLanguage] = useState("python3");
+  const [language, setLanguage] = useState("python");
   const [selectedProblem, setSelectedProblem] = useState("");
-  const [problemContent, setProblemContent] = useState("");
+  const [problemContent, setProblemContent] = useState<string | undefined>("");
   const [code, setCode] = useState(`class Solution:
     def solve(self):
         # Write your code here
@@ -72,7 +71,9 @@ export default function CodeEditor() {
 
   useEffect(() => {
     if (selectedProblem) {
-      fetchProblemData(selectedProblem).then(setProblemContent);
+      fetchProblemData(selectedProblem).then((data) => {
+        setProblemContent(data || "");
+      });
     }
   }, [selectedProblem]);
 
@@ -132,7 +133,7 @@ export default function CodeEditor() {
         {/* Right Panel - Code Editor with Syntax Highlighting */}
         <Card className="overflow-hidden flex-grow h-full">
           <MonacoEditor
-            language="python"
+            language={language} // 动态设置语言
             theme="vs-dark"
             value={code}
             options={{
@@ -140,8 +141,8 @@ export default function CodeEditor() {
               automaticLayout: true,
               colorDecorators: true,
             }}
-            onChange={(newValue) => setCode(newValue)}
-            editorDidMount={(editor) => {
+            onChange={(newValue) => setCode(newValue || "")} // 处理 newValue 可能为 undefined 的情况
+            onMount={(editor) => {
               editor.focus();
             }}
             className="h-full"
