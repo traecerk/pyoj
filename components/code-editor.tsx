@@ -1,76 +1,80 @@
-'use client'
+"use client";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card } from "@/components/ui/card";
+import ReactMarkdown from "react-markdown";
+import MonacoEditor from "react-monaco-editor";
 
-import { useState, useEffect } from 'react'
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Card } from "@/components/ui/card"
-import ReactMarkdown from 'react-markdown'
-import dynamic from 'next/dynamic'
-import MonacoEditor, { monaco } from 'react-monaco-editor'
-
-// Mock function to simulate fetching problem data from a backend
 const fetchProblemData = async (problem: string): Promise<string> => {
   try {
-    const response = await fetch(`http://localhost:8000/api/problems/${problem}`);
+    const response = await fetch(
+      `http://localhost:8000/api/problems/${problem}`
+    );
     if (!response.ok) {
-      throw new Error('Network response was not ok');
+      throw new Error("Network response was not ok");
     }
     const data = await response.json();
     return data.description;
   } catch (error) {
-    console.error('Error fetching problem data:', error);
-    return 'Error fetching problem data. Please try again later.';
+    console.error("Error fetching problem data:", error);
+    return "Error fetching problem data. Please try again later.";
   }
-}
-// const executeCode = () => {
-//   alert('执行代码');
-// };
+};
 
-const submitCode = (selectedProblem: string, code: string, problem: string) => {
+const submitCode = (
+  selectedProblem: string,
+  code: string,
+  problem: string,
+  setJudgementResult: (result: string) => void
+) => {
   const codeData = {
     code,
     problem: selectedProblem,
   };
 
   fetch(`http://localhost:8000/api/submit/${problem}`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify(codeData),
   })
-   .then(response => response.json())
-   .then(result => {
-      // Handle the result here, e.g., display it to the user
-      console.log('Result:', result);
-      // Update the judgementResult state
-      setJudgeResult(result.result);
+    .then((response) => response.json())
+    .then((result) => {
+      console.log("Result:", result);
+      setJudgementResult(result.result);
     })
-   .catch(error => {
-      console.error('Error:', error);
+    .catch((error) => {
+      console.error("Error:", error);
+      setJudgementResult("无法评判代码，请稍后再试。");
     });
 };
 
 export default function CodeEditor() {
-  const [judgementResult, setJudgeResult] = useState(null);
-  const [language, setLanguage] = useState('python3')
-  const [selectedProblem, setSelectedProblem] = useState('')
-  const [problemContent, setProblemContent] = useState('')
+  const [judgementResult, setJudgementResult] = useState<string | null>(null);
+  const [language, setLanguage] = useState("python3");
+  const [selectedProblem, setSelectedProblem] = useState("");
+  const [problemContent, setProblemContent] = useState("");
   const [code, setCode] = useState(`class Solution:
     def solve(self):
         # Write your code here
         pass
-`)
-  useEffect(() => {
-    
+`);
 
-   
+  useEffect(() => {
     if (selectedProblem) {
-      fetchProblemData(selectedProblem).then(setProblemContent)
+      fetchProblemData(selectedProblem).then(setProblemContent);
     }
-  }, [selectedProblem])
-  
+  }, [selectedProblem]);
+
   return (
     <div className="h-screen flex flex-col">
       {/* Top Navigation */}
@@ -116,7 +120,9 @@ export default function CodeEditor() {
                   {problemContent}
                 </ReactMarkdown>
               ) : (
-                <p className="text-muted-foreground">Please select a problem to view its description.</p>
+                <p className="text-muted-foreground">
+                  Please select a problem to view its description.
+                </p>
               )}
             </ScrollArea>
           </Card>
@@ -124,23 +130,20 @@ export default function CodeEditor() {
 
         {/* Right Panel - Code Editor with Syntax Highlighting */}
         <Card className="relative overflow-hidden flex-1">
-
-            <MonacoEditor
-              language="python"
-              theme="vs-dark"
-              value={code}
-
-              options={{
-                selectOnLineNumbers: true,
-                automaticLayout: true,
-                colorDecorators: true,
-              }}
-              onChange={(newValue) => setCode(newValue)}
-              editorDidMount={(editor) => {
-                editor.focus();
-              }}
-            />
-
+          <MonacoEditor
+            language="python"
+            theme="vs-dark"
+            value={code}
+            options={{
+              selectOnLineNumbers: true,
+              automaticLayout: true,
+              colorDecorators: true,
+            }}
+            onChange={(newValue) => setCode(newValue)}
+            editorDidMount={(editor) => {
+              editor.focus();
+            }}
+          />
         </Card>
       </div>
 
@@ -149,14 +152,26 @@ export default function CodeEditor() {
         <div className="container py-2 flex justify-between items-center">
           <div className="flex gap-2">
             {/* <Button variant="outline" size="sm" onClick={() => executeCode}>执行代码</Button> */}
-            <Button variant="outline" size="sm" onClick={() => submitCode(selectedProblem, code, selectedProblem)}>提交</Button>
-            
-              <div className="flex-1 flex justify-center items-center">
-                <div className="text-sm text-muted-foreground">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                submitCode(
+                  selectedProblem,
+                  code,
+                  selectedProblem,
+                  setJudgementResult
+                )
+              }
+            >
+              提交
+            </Button>
+
+            <div className="flex-1 flex justify-center items-center">
+              <div className="text-sm text-muted-foreground">
                 <span>评判结果: {judgementResult}</span>
-                </div>
               </div>
-            
+            </div>
           </div>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span>内存: 256MB</span>
@@ -165,7 +180,5 @@ export default function CodeEditor() {
         </div>
       </footer>
     </div>
-  )
+  );
 }
-
-
